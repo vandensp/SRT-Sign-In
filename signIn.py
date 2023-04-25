@@ -1,5 +1,7 @@
+#!/usr/bin/python3
 import serial
 import serial.tools.list_ports
+import time
 
 scanHistory = dict({"Barcodes":[]})
 signedIn = []
@@ -17,8 +19,22 @@ def storeScan(line):
     print("Scan Stored")
     print(scanHistory)
 
+lasttime = time.time()
+last_id = None
 while True: #checks for new input from barcode and updates dataframe
+
     line = ser.readline()
     line = line.decode('utf-8',errors='ignore').rstrip('/r/n')
-    line = int(line)
-    storeScan(line)
+    try:
+        line = int(line)
+        if last_id != line:
+            storeScan(line)
+        else: 
+            print("double scanned")
+    except ValueError:
+        print("not an int value, was:", line)
+    if lasttime-time.time() > 5: 
+        last_id = None
+        lasttime = time.time()
+    
+    
