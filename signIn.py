@@ -1,12 +1,12 @@
 import serial
 import datetime
 import serial.tools.list_ports
-import pandas as pd
+import json
 
-studentRecord = pd.read_csv("studentRecords.csv")
+
+
 visitHistory = dict({"studentID":[], "name":[],"major":[],"Sign-in Time":[],"Sign-out Time":[]})
 roomStatus = dict({"Students In":[]})
-historyDF = pd.DataFrame()
 
 comlist = serial.tools.list_ports.comports() #finds barcode port and opens it
 connected = []
@@ -38,39 +38,25 @@ def signingOut(student): #Keeps a list of all recorded scans
 
 def getStudent(line):
     #find student with matching ID
-    for student in studentRecord:
-        if student["studentID"] == line:
-            return student
-        else:
-            print("Student Not Found")
-lasttime = time.time()
-last_id = None
-try:            
-    while True: #checks for new input from barcode and updates dataframe
-        line = ser.readline()
-            if len(line) > 3:
-                line = line.decode('utf-8',errors='ignore').rstrip('/r/n')
-                try:
-                    line = int(line)
-                    if last_id != line:
-                        student = studentRecord.loc[studentRecord['studentID'] == line]
-                        ser.flush()
-                        print("\n\nName",student.name,"\n\n")
-                        if str(student['signingIn']) == "True": #If student is signing in
-                            signingIn(student)
-                        else: #If student is signing out
-                            signingOut(student)
-                            storeVisit(student)
-                        #If time is pass hours
-                        
-                        last_id = line
-                    else: 
-                        print("double scanned")
-                except ValueError:
-                    print("not an int value, was:", line)
-            if time.time()-lasttime > 5: 
-                last_id = None
-                lasttime = time.time()    
-except KeyboardInterrupt:
-    ser.close()
-    exit(0)
+    try:
+        student = json.load(open(f'logs/{line}.json'))
+    except:
+        print("Student Not Found")
+        student = {'id': line, 'name': 'tempName', 'Major': 'major', 'cur_visit': 'None', 'Visits': []}
+        json.dump(student, open(f'logs/{line}.json'),indent=4)
+    return student
+            
+while True: #checks for new input from barcode and updates dataframe
+    line = ser.readline()
+    line = line.decode('utf-8',errors='ignore').rstrip('/r/n')
+    line = int(line)
+    student = getStudent(line)
+    ser.flush()
+    print("\n\nName",student.name,"\n\n")
+    if str(student['signingIn']) == "True": #If student is signing in
+        signingIn(student)
+    else: #If student is signing out
+        signingOut(student)
+        storeVisit(student)
+    #If time is pass hours
+    #    for student in Students
