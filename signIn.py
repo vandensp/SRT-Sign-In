@@ -1,8 +1,9 @@
+#!/usr/bin/env python3
 import serial
 import datetime
 import serial.tools.list_ports
 import json
-
+import time
 
 
 
@@ -19,23 +20,25 @@ for element in comlist:
         
 def signingIn(student): #Keeps a list of all recorded scans
         #edit students scan status and time
-        student["cur_visit"] = {str(datetime.datetime.now().time()):{
+        student["cur_visit"] = {
                 "in":str(datetime.datetime.now().time()), 
                 "out":"",
                 "type": "office hours",
                 "SRT":"name",
                 "class":"class title",
                 "Priority":0
-              }}
+              }
+        json.dump(student, open(f'logs/{student["id"]}.json', 'w'),indent=4)
         print("Student Signed In!")
+        return student
         
 def signingOut(student): #Keeps a list of all recorded scans
         #edit students scan status and history  
         visit = student["cur_visit"]
         visit["out"] = str(datetime.datetime.now().time())
-        student["visits"][student["cur_visit"]]=visit
+        student["visits"][student["cur_visit"]["in"]]=visit
         student["cur_visit"]="None"
-        json.dump(student, open(f'logs/{line}.json'),indent=4)
+        json.dump(student, open(f'logs/{student["id"]}.json', 'w'),indent=4)
         print("Student Signed Out :(")
 
 def getStudent(line):
@@ -44,20 +47,39 @@ def getStudent(line):
         student = json.load(open(f'logs/{line}.json'))
     except:
         print("Student Not Found")
-        student = {'id': line, 'name': 'tempName', 'Major': 'major', 'cur_visit': 'None', 'Visits': []}
-        json.dump(student, open(f'logs/{line}.json'),indent=4)
+        student = {'id': line, 'name': 'tempName', 'major': 'major', 'cur_visit': 'None', 'visits': {}}
+        with open(f'logs/{line}.json', 'w') as f:
+            json.dump(student, f,indent=4)
     return student
             
-while True: #checks for new input from barcode and updates dataframe
-    line = ser.readline()
-    line = line.decode('utf-8',errors='ignore').rstrip('/r/n')
-    line = int(line)
-    student = getStudent(line)
-    ser.flush()
-    print("\n\nName",student.name,"\n\n")
-    if str(student['cur_visit']) == "None": #If student is signing in
-        signingIn(student)
-    else: #If student is signing out
-        signingOut(student)
-    #If time is pass hours
-    #    for student in Students
+
+lasttime = time.time()
+last_id = None
+try:
+    while True: #checks for new input from barcode and updates dataframe
+        line = ser.readline()
+        if len(line) > 3:
+            line = line.decode('utf-8',errors='ignore').rstrip('/r/n')
+            try:
+                line = int(line)
+                print(line)
+                if last_id != line:
+                    student = getStudent(line)
+                    ser.flush()
+                    print("\n\nName",student["name"],"\n\n")
+                    if str(student['cur_visit']) == "None": #If student is signing in
+                        signingIn(student)
+                    else: #If student is signing out
+                        signingOut(student)
+                    #If time is pass hours
+                    #    for student in Students
+                    last_id = line
+                else: 
+                    print("double scanned")
+            except ValueError:
+                print("not an int value, was:", line)
+        if time.time()-lasttime > 5: 
+            last_id = None
+            lasttime = time.time()
+except KeyboardInterrupt:
+    ser.close()

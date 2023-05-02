@@ -1,9 +1,9 @@
 {
     "id": 80000000,
     "name": "name",
-    "Major": "major",
+    "major": "major",
     "cur_visit": "None",
-    "Visits":{
+    "visits":{
         "1:00":{
         "in":"1:00",
         "out":"2:00",
