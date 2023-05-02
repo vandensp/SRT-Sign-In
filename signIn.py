@@ -21,7 +21,7 @@ def storeVisit(student): #Keeps a list of all recorded scans
         visitHistory["name"].append(student["name"])
         visitHistory["major"].append(student["major"])
         visitHistory["Sign-in Time"].append(student["Sign-in Time"])
-        visitHistory["Sign-out Time"].append(student["Sign-out Time"]
+        visitHistory["Sign-out Time"].append(student["Sign-out Time"])
         
 def signingIn(student): #Keeps a list of all recorded scans
         #edit students scan status and time
@@ -43,19 +43,34 @@ def getStudent(line):
             return student
         else:
             print("Student Not Found")
-            
-while True: #checks for new input from barcode and updates dataframe
-    line = ser.readline()
-    line = line.decode('utf-8',errors='ignore').rstrip('/r/n')
-    line = int(line)
-    student = studentRecord.loc[studentRecord['studentID'] == line]
-    ser.flush()
-    print("\n\nName",student.name,"\n\n")
-    if str(student['signingIn']) == "True": #If student is signing in
-        signingIn(student)
-    else: #If student is signing out
-        signingOut(student)
-        storeVisit(student)
-    #If time is pass hours
-    #    for student in Students
-        for student in Students
+lasttime = time.time()
+last_id = None
+try:            
+    while True: #checks for new input from barcode and updates dataframe
+        line = ser.readline()
+            if len(line) > 3:
+                line = line.decode('utf-8',errors='ignore').rstrip('/r/n')
+                try:
+                    line = int(line)
+                    if last_id != line:
+                        student = studentRecord.loc[studentRecord['studentID'] == line]
+                        ser.flush()
+                        print("\n\nName",student.name,"\n\n")
+                        if str(student['signingIn']) == "True": #If student is signing in
+                            signingIn(student)
+                        else: #If student is signing out
+                            signingOut(student)
+                            storeVisit(student)
+                        #If time is pass hours
+                        
+                        last_id = line
+                    else: 
+                        print("double scanned")
+                except ValueError:
+                    print("not an int value, was:", line)
+            if time.time()-lasttime > 5: 
+                last_id = None
+                lasttime = time.time()    
+except KeyboardInterrupt:
+    ser.close()
+    exit(0)
