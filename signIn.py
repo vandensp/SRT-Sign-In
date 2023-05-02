@@ -5,7 +5,7 @@ import json
 
 
 
-visitHistory = dict({"studentID":[], "name":[],"major":[],"Sign-in Time":[],"Sign-out Time":[]})
+
 roomStatus = dict({"Students In":[]})
 
 comlist = serial.tools.list_ports.comports() #finds barcode port and opens it
@@ -16,24 +16,26 @@ for element in comlist:
         ser = serial.Serial(element.device)
     print("Barcode Scanner connected at:", ser.name)
 
-def storeVisit(student): #Keeps a list of all recorded scans
-        visitHistory["studentID"].append(student["studentID"])
-        visitHistory["name"].append(student["name"])
-        visitHistory["major"].append(student["major"])
-        visitHistory["Sign-in Time"].append(student["Sign-in Time"])
-        visitHistory["Sign-out Time"].append(student["Sign-out Time"])
         
 def signingIn(student): #Keeps a list of all recorded scans
         #edit students scan status and time
-        student["Sign-in Time"] = datetime.datetime.now().time()
-        student['signingIn'] = "False"
+        student["cur_visit"] = {str(datetime.datetime.now().time()):{
+                "in":str(datetime.datetime.now().time()), 
+                "out":"",
+                "type": "office hours",
+                "SRT":"name",
+                "class":"class title",
+                "Priority":0
+              }}
         print("Student Signed In!")
         
 def signingOut(student): #Keeps a list of all recorded scans
-        #edit students scan status and histoyr
-        student["Sign-out Time"] = datetime.datetime.now().time()
-        #record visit
-        student['signingIn'] = "True"
+        #edit students scan status and history  
+        visit = student["cur_visit"]
+        visit["out"] = str(datetime.datetime.now().time())
+        student["visits"][student["cur_visit"]]=visit
+        student["cur_visit"]="None"
+        json.dump(student, open(f'logs/{line}.json'),indent=4)
         print("Student Signed Out :(")
 
 def getStudent(line):
@@ -53,10 +55,9 @@ while True: #checks for new input from barcode and updates dataframe
     student = getStudent(line)
     ser.flush()
     print("\n\nName",student.name,"\n\n")
-    if str(student['signingIn']) == "True": #If student is signing in
+    if str(student['cur_visit']) == "None": #If student is signing in
         signingIn(student)
     else: #If student is signing out
         signingOut(student)
-        storeVisit(student)
     #If time is pass hours
     #    for student in Students
