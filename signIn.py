@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 import serial
-import datetime
 import serial.tools.list_ports
 import json
 import time
@@ -13,7 +12,7 @@ comlist = serial.tools.list_ports.comports() #finds barcode port and opens it
 connected = []
 for element in comlist:
     connected.append(element.device)
-    if element.description == "barcode scanner"or ("USB Serial Device" in element.description)::
+    if element.description == "barcode scanner"or ("USB Serial Device" in element.description):
         ser = serial.Serial(element.device, timeout=5)
     print("Barcode Scanner connected at:", ser.name)
 
@@ -24,7 +23,7 @@ if ser == None:
 def signingIn(student): #Keeps a list of all recorded scans
         #edit students scan status and time
         student["cur_visit"] = {
-                "in":str(datetime.datetime.now().time()), 
+                "in":time.strftime("%a, %d %b %Y %H:%M:%S"), 
                 "out":"",
                 "type": "office hours",
                 "SRT":"name",
@@ -38,7 +37,7 @@ def signingIn(student): #Keeps a list of all recorded scans
 def signingOut(student): #Keeps a list of all recorded scans
         #edit students scan status and history  
         visit = student["cur_visit"]
-        visit["out"] = str(datetime.datetime.now().time())
+        visit["out"] = time.strftime("%a, %d %b %Y %H:%M:%S")
         student["visits"][student["cur_visit"]["in"]]=visit
         student["cur_visit"]="None"
         json.dump(student, open(f'logs/{student["id"]}.json', 'w'),indent=4)
