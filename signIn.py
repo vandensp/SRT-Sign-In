@@ -1,12 +1,12 @@
 import serial
 import datetime
 import serial.tools.list_ports
-import pandas as pd
+import json
 
-studentRecord = pd.read_csv("studentRecords.csv")
+
+
 visitHistory = dict({"studentID":[], "name":[],"major":[],"Sign-in Time":[],"Sign-out Time":[]})
 roomStatus = dict({"Students In":[]})
-historyDF = pd.DataFrame()
 
 comlist = serial.tools.list_ports.comports() #finds barcode port and opens it
 connected = []
@@ -21,7 +21,7 @@ def storeVisit(student): #Keeps a list of all recorded scans
         visitHistory["name"].append(student["name"])
         visitHistory["major"].append(student["major"])
         visitHistory["Sign-in Time"].append(student["Sign-in Time"])
-        visitHistory["Sign-out Time"].append(student["Sign-out Time"]
+        visitHistory["Sign-out Time"].append(student["Sign-out Time"])
         
 def signingIn(student): #Keeps a list of all recorded scans
         #edit students scan status and time
@@ -38,17 +38,19 @@ def signingOut(student): #Keeps a list of all recorded scans
 
 def getStudent(line):
     #find student with matching ID
-    for student in studentRecord:
-        if student["studentID"] == line:
-            return student
-        else:
-            print("Student Not Found")
+    try:
+        student = json.load(open(f'logs/{line}.json'))
+    except:
+        print("Student Not Found")
+        student = {'id': line, 'name': 'tempName', 'Major': 'major', 'cur_visit': 'None', 'Visits': []}
+        json.dump(student, open(f'logs/{line}.json'),indent=4)
+    return student
             
 while True: #checks for new input from barcode and updates dataframe
     line = ser.readline()
     line = line.decode('utf-8',errors='ignore').rstrip('/r/n')
     line = int(line)
-    student = studentRecord.loc[studentRecord['studentID'] == line]
+    student = getStudent(line)
     ser.flush()
     print("\n\nName",student.name,"\n\n")
     if str(student['signingIn']) == "True": #If student is signing in
@@ -58,4 +60,3 @@ while True: #checks for new input from barcode and updates dataframe
         storeVisit(student)
     #If time is pass hours
     #    for student in Students
-        for student in Students
