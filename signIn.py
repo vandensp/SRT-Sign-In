@@ -13,9 +13,12 @@ comlist = serial.tools.list_ports.comports() #finds barcode port and opens it
 connected = []
 for element in comlist:
     connected.append(element.device)
-    if element.description == "barcode scanner":
-        ser = serial.Serial(element.device)
+    if element.description == "barcode scanner"or ("USB Serial Device" in element.description)::
+        ser = serial.Serial(element.device, timeout=5)
     print("Barcode Scanner connected at:", ser.name)
+
+if ser == None:
+    exit(0)
 
         
 def signingIn(student): #Keeps a list of all recorded scans
