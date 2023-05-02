@@ -1,0 +1,25 @@
+{
+    "id": 80000000,
+    "name": "name",
+    "Major": "major",
+    "cur_visit": "None",
+    "Visits":[  
+        {
+        "UUID":1,
+        "in":"1:00",
+        "out":"2:00",
+        "type": "office hours",
+        "SRT":"name",
+        "class":"class title",
+        "Priority":0
+    },{
+        "UUID":2,
+        "in":"1:00",
+        "out":"2:00",
+        "type": "office hours",
+        "SRT":"name",
+        "class":"class title",
+        "Priority":0
+    }
+    ]
+}
