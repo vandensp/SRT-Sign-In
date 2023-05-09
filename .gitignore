@@ -1,2 +1,6 @@
 logs/**
 !logs/sample.json
+other/out_raw.bmp
+other/out.bin
+other/smbus_ssd1306/out_raw.bmp
+other/smbus_ssd1306/out.bin
