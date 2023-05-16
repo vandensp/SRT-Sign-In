@@ -38,7 +38,7 @@ def serialSetup():
     return ser
 
 
-def signingIn(student, current_SRT): #Keeps a list of all recorded scans
+def signingIn(student:dict, current_SRT:str): #Keeps a list of all recorded scans
         #edit students scan status and time
         student["cur_visit"] = {
                 "in":time.strftime("%a, %d %b %Y %H:%M:%S"), 
@@ -50,11 +50,11 @@ def signingIn(student, current_SRT): #Keeps a list of all recorded scans
               }
         json.dump(student, open(f'logs/{student["id"]}.json', 'w'),indent=4)
         #add student to SRT queue
-        srtQueue(student, current_SRT)
+        srtQueue(student, current_SRT, "in")
         print("Student Signed In!")
         return student
         
-def signingOut(student): #Keeps a list of all recorded scans
+def signingOut(student:dict): #Keeps a list of all recorded scans
         #edit students scan status and history  
         visit = student["cur_visit"]
         srt = visit["SRT"]
@@ -63,11 +63,11 @@ def signingOut(student): #Keeps a list of all recorded scans
         student["cur_visit"]="None"
         json.dump(student, open(f'logs/{student["id"]}.json', 'w'),indent=4)
         # remove student from SRT queue
-        srtQueue(student, srt)
+        srtQueue(student, srt, "out")
         print("Student Signed Out :(")
         return 
 
-def getStudent(line):
+def getStudent(line:int):
     #find student with matching ID
     try:
         student = json.load(open(f'logs/{line}.json'))
@@ -78,22 +78,26 @@ def getStudent(line):
             json.dump(student, f,indent=4)
     return student
             
-def srtQueue(student, srt):
+def srtQueue(student:dict, srt:str, direction:str):
     #short form student info
     id = student["id"]
     # get SRT queue
     queue = SRT_occupancy[srt]
-    if id in queue:
-        del queue[id]
-    else:
+    if direction == "in":
         time_in = student["cur_visit"]["in"]
         class_in = student["cur_visit"]["class"]
         priority = student["cur_visit"]["priority"]
-        student_short = {'id':student["id"], "name":student["name"], "time in":time_in, "class":class_in, "priority":priority}
+        student_short = {'id':student["id"], "name":student["name"],"major":student["major"], "time in":time_in, "class":class_in, "priority":priority}
         queue[id] = student_short
+    elif direction == "out":
+        if id in queue:
+            del queue[id]
     SRT_occupancy[srt] = queue
+    with open(f'logs/SRT_{srt.replace(" ", "_")}_queue.json', 'w') as f:
+            json.dump(queue, f,indent=4)
 
-def cycleSRT(current, direction:int):
+
+def cycleSRT(current:str, direction:int):
     #direction is int, +1 or -1 hopefully
     # set up srt list
     SRT_list = list(SRT_occupancy)
@@ -105,7 +109,7 @@ def cycleSRT(current, direction:int):
         if direction == -1:
             srt = SRT_list[-1]
             return srt
-    elif index == length:
+    elif index == length-1:
         if direction == 1:
             srt = SRT_list[0]
             return srt
@@ -159,11 +163,11 @@ def main():
                 line = line.decode('utf-8',errors='ignore').rstrip('/r/n')
                 try:
                     line = int(line)
-                    print(line)
+                    print(f'\nScanner reads: \n{line}')
                     if last_id != line:
                         student = getStudent(line)
                         ser.flush()
-                        print("\n\nName",student["name"],"\n\n")
+                        print(f'Name: {student["name"]}')
                         if str(student['cur_visit']) == "None": #If student is signing in
                             signingIn(student, current_SRT)
                         else: #If student is signing out
@@ -201,8 +205,9 @@ def main():
             disp.image(image)
             disp.display()
     except KeyboardInterrupt:
-        print("Exiting \n")
+        print("\n Shutting down scanner")
         ser.close()
+        print("Exiting")
 
 
 main()
