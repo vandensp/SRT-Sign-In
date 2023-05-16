@@ -14,6 +14,9 @@ leds = [18,16,19] # P9_14, P9_15, P9_16
 CONSUMER='getset'
 CHIP='1'
 
+YELLOW_LIMIT = 1
+RED_LIMIT = 2
+
 SRT_occupancy = {
     "placeholder 0":{},
     "placeholder 1":{}, 
@@ -30,13 +33,12 @@ def serialSetup():
             ser = serial.Serial(element.device, timeout=0)
         print("Barcode Scanner connected at:", ser.name)
     if ser == None:
+        print("No barcode scanner found, exiting")
         exit(0)
     return ser
 
 
 def signingIn(student, current_SRT): #Keeps a list of all recorded scans
-        #add student to SRT queue
-        SRT_occupancy[current_SRT].append(student["id"])
         #edit students scan status and time
         student["cur_visit"] = {
                 "in":time.strftime("%a, %d %b %Y %H:%M:%S"), 
@@ -44,9 +46,10 @@ def signingIn(student, current_SRT): #Keeps a list of all recorded scans
                 "type": "office hours",
                 "SRT":current_SRT,
                 "class":"class title",
-                "Priority":0
+                "priority":0
               }
         json.dump(student, open(f'logs/{student["id"]}.json', 'w'),indent=4)
+        #add student to SRT queue
         srtQueue(student, current_SRT)
         print("Student Signed In!")
         return student
@@ -59,9 +62,9 @@ def signingOut(student): #Keeps a list of all recorded scans
         student["visits"][student["cur_visit"]["in"]]=visit
         student["cur_visit"]="None"
         json.dump(student, open(f'logs/{student["id"]}.json', 'w'),indent=4)
+        # remove student from SRT queue
         srtQueue(student, srt)
         print("Student Signed Out :(")
-        SRT_occupancy[visit["SRT"]].remove(student["id"])
         return 
 
 def getStudent(line):
@@ -83,7 +86,10 @@ def srtQueue(student, srt):
     if id in queue:
         del queue[id]
     else:
-        student_short = {'id':student["id"], "name":student["name"], "time in":student["cur_visit"]["in"], "class":student["cur_visit"]["class"], "priority":student["cur_visit"]["priority"]}
+        time_in = student["cur_visit"]["in"]
+        class_in = student["cur_visit"]["class"]
+        priority = student["cur_visit"]["priority"]
+        student_short = {'id':student["id"], "name":student["name"], "time in":time_in, "class":class_in, "priority":priority}
         queue[id] = student_short
     SRT_occupancy[srt] = queue
 
@@ -181,12 +187,12 @@ def main():
                     current_SRT = cycleSRT(current_SRT, -1)
                 elif vals[2] == 1: # right button pressed
                     current_SRT = cycleSRT(current_SRT, 1)
-            
-            if SRT_occupancy[current_SRT] == 0:
+            occupancy = len(SRT_occupancy[current_SRT])
+            if occupancy < YELLOW_LIMIT:
                 setlines.set_values([0,0,1])
-            elif SRT_occupancy[current_SRT] == 1:
+            elif occupancy >= YELLOW_LIMIT and occupancy < RED_LIMIT:
                 setlines.set_values([0,1,0])
-            elif SRT_occupancy[current_SRT] > 1:
+            elif occupancy >= RED_LIMIT:
                 setlines.set_values([1,0,0])
             # first line
             draw.rectangle([0,0,disp.width,disp.height], fill=0)
@@ -195,6 +201,7 @@ def main():
             disp.image(image)
             disp.display()
     except KeyboardInterrupt:
+        print("Exiting \n")
         ser.close()
 
 
