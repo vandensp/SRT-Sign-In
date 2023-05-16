@@ -54,11 +54,12 @@ def signingIn(student, current_SRT): #Keeps a list of all recorded scans
 def signingOut(student): #Keeps a list of all recorded scans
         #edit students scan status and history  
         visit = student["cur_visit"]
+        srt = visit["SRT"]
         visit["out"] = time.strftime("%a, %d %b %Y %H:%M:%S")
         student["visits"][student["cur_visit"]["in"]]=visit
         student["cur_visit"]="None"
         json.dump(student, open(f'logs/{student["id"]}.json', 'w'),indent=4)
-        srtQueue(student, current_SRT)
+        srtQueue(student, srt)
         print("Student Signed Out :(")
         SRT_occupancy[visit["SRT"]].remove(student["id"])
         return 
