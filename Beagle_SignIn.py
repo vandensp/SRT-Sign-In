@@ -15,9 +15,9 @@ CONSUMER='getset'
 CHIP='1'
 
 SRT_occupancy = {
-    "placeholder 0":[],
-    "placeholder 1":[], 
-    "placeholder 2":[]
+    "placeholder 0":{},
+    "placeholder 1":{}, 
+    "placeholder 2":{}
 }
 
 def serialSetup():
@@ -47,6 +47,7 @@ def signingIn(student, current_SRT): #Keeps a list of all recorded scans
                 "Priority":0
               }
         json.dump(student, open(f'logs/{student["id"]}.json', 'w'),indent=4)
+        srtQueue(student, current_SRT)
         print("Student Signed In!")
         return student
         
@@ -57,6 +58,7 @@ def signingOut(student): #Keeps a list of all recorded scans
         student["visits"][student["cur_visit"]["in"]]=visit
         student["cur_visit"]="None"
         json.dump(student, open(f'logs/{student["id"]}.json', 'w'),indent=4)
+        srtQueue(student, current_SRT)
         print("Student Signed Out :(")
         SRT_occupancy[visit["SRT"]].remove(student["id"])
         return 
@@ -72,8 +74,36 @@ def getStudent(line):
             json.dump(student, f,indent=4)
     return student
             
+def srtQueue(student, srt):
+    #short form student info
+    id = student["id"]
+    # get SRT queue
+    queue = SRT_occupancy[srt]
+    if id in queue:
+        del queue[id]
+    else:
+        student_short = {'id':student["id"], "name":student["name"], "time in":student["cur_visit"]["in"], "class":student["cur_visit"]["class"], "priority":student["cur_visit"]["priority"]}
+        queue[id] = student_short
+    SRT_occupancy[srt] = queue
 
-
+def cycleSRT(current, direction:int):
+    #direction is int, +1 or -1 hopefully
+    # set up srt list
+    SRT_list = list(SRT_occupancy)
+    # find where current SRT is
+    index = SRT_list.index(current)
+    # if else to handle ends of list
+    length = len(SRT_list)
+    if index == 0:
+        if direction == -1:
+            srt = SRT_list[-1]
+            return srt
+    elif index == length:
+        if direction == 1:
+            srt = SRT_list[0]
+            return srt
+    srt = SRT_list[index+direction]
+    return srt
 
 def main():
     chip = gpiod.Chip(CHIP)
@@ -114,7 +144,7 @@ def main():
     
     lasttime = time.time()
     last_id = None
-    SRT_list = list(SRT_occupancy)
+    
     try:
         while True: #checks for new input from barcode and updates dataframe
             line = ser.readline()
@@ -143,14 +173,13 @@ def main():
                 lasttime = time.time()
             input = getlines.event_wait(sec=1)
             if input:
-                
                 vals =  getlines.get_values()
                 if vals[1] == 1:# center button pressed
                     pass
                 elif vals[0] == 1: #left button pressed
-                    current_SRT = .index()
+                    current_SRT = cycleSRT(current_SRT, -1)
                 elif vals[2] == 1: # right button pressed
-                    current_SRT += 1
+                    current_SRT = cycleSRT(current_SRT, 1)
             
             if SRT_occupancy[current_SRT] == 0:
                 setlines.set_values([0,0,1])
@@ -161,7 +190,7 @@ def main():
             # first line
             draw.rectangle([0,0,disp.width,disp.height], fill=0)
             draw.text((0,0), "Select SRT to visit", font=font,fill=255)
-            draw.text((0,16), SRT_list[current_SRT], font=font,fill=255)
+            draw.text((0,16), current_SRT, font=font,fill=255)
             disp.image(image)
             disp.display()
     except KeyboardInterrupt:
