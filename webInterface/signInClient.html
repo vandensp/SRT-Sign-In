@@ -14,10 +14,9 @@
     <img src="srtlogo.png" height=250 width=600>
     <h3 id='temp0'></h3>
     <h2>Current SRTs</h2>
-    <h3 id='srt1'></h3> <img src="srtPhotos/TR.jpg" height=250 width=250>
-    <h3 id='srt2'></h3> <img src="srtPhotos/NH.jpg" height =250 width=250> 
-    <h2>Current Occupancy</h2>
-    <h3 id='temp1'> xx / 36</h3>
+    <h3 id='srt1'></h3> <img src="srtPhotos/Tori Robinson.jpg" height=250 width=250>
+    <h3 id='srt2'></h3> <img src="srtPhotos/Nathan Hurtig.jpg" height =250 width=250> 
+    <h3 id='occupancy'></h2>
     <h3 ><br/><p>Upcoming Review Sessions</p></h4>
 	
     <script type="text/javascript">
@@ -31,7 +30,7 @@
           $('#temp0').append("Connected to " + echoUrl); 
           $('#srt1').html(data.currentSRTs.split(",")[0]); 
           $('#srt2').html(data.currentSRTs.split(",")[1]);   
-          $('#temp1').html("Response: " + data.msg );    
+          $('#occupancy').html("Occupancy: " + data.occupancy + " / 36" );    
         }
       })
     );

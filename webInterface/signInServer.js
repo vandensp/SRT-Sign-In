@@ -2,8 +2,16 @@
 var http = require("http");    //#A
 var port = 1441;    // can use any port # you prefer (above 1024) - client must use same port #
 var currentSRTs = ["Tori Robinson","Nathan Hurtig"];
+var occupancy = 0;
+var imgSRCs = [];
 
 function getSRTs() {
+  for (i in currentSRTs)
+    fetch('srtPhotos/'+currentSRTs[i]+'.jpg')
+      .then(response => response.blob())
+      .then(blob => {
+        imgSRCs.append(URL.createObjectURL(blob));
+      });
 }
 
 // anonymous function - function which handles requests to server
@@ -23,15 +31,16 @@ http.createServer(function(request,response){    //#B
   for (x in trailers) {
     console.log('\t{' + x + ': \"' + trailers[x] + '\"}');
   }
-  //topRestaurant(location);
   response.writeHead(200,    //#C
         {'Content-Type': 'application/json',    //#D
          'Access-Control-Allow-Origin': '*'});    //#E
-  response.write('{"currentSRTs" : "' + currentSRTs + '", "msg" : "'+ "TEST MESSAGE" +'"}');    //#F
+  //getSRTs();
+  response.write('{"currentSRTs" : "' + currentSRTs + '", "occupancy" : "' + occupancy +
+  '", "images" : "' + imgSRCs +'"}');    //#F
   response.end();    //#G
   console.log('Response sent to client\n');
 
-}).listen(port);    //#H
+}).listen(port,'');    //#H
 console.log('Server listening on http://localhost:' + port);
 
 //#A Create an http object, which requires the http module 
