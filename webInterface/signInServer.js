@@ -2,17 +2,10 @@
 var http = require("http");    //#A
 var port = 1441;    // can use any port # you prefer (above 1024) - client must use same port #
 var currentSRTs = ["Tori Robinson","Nathan Hurtig"];
+var queue = [];
 var occupancy = 0;
-var imgSRCs = [];
-
-function getSRTs() {
-  for (i in currentSRTs)
-    fetch('srtPhotos/'+currentSRTs[i]+'.jpg')
-      .then(response => response.blob())
-      .then(blob => {
-        imgSRCs.append(URL.createObjectURL(blob));
-      });
-}
+var ip = '137.112.220.167';
+var fs = require('fs')
 
 // anonymous function - function which handles requests to server
 // request - incoming request message
@@ -31,17 +24,23 @@ http.createServer(function(request,response){    //#B
   for (x in trailers) {
     console.log('\t{' + x + ': \"' + trailers[x] + '\"}');
   }
+  
+  logs=require('../logs/SRT_sample_queue.json')
+  occupancy=Object.keys(logs).length;
+  for (student in logs) {
+    queue.push(student);
+  }
+
   response.writeHead(200,    //#C
         {'Content-Type': 'application/json',    //#D
          'Access-Control-Allow-Origin': '*'});    //#E
-  //getSRTs();
   response.write('{"currentSRTs" : "' + currentSRTs + '", "occupancy" : "' + occupancy +
-  '", "images" : "' + imgSRCs +'"}');    //#F
+  '", "queue" : "' + queue +'"}');    //#F
   response.end();    //#G
   console.log('Response sent to client\n');
 
-}).listen(port,'');    //#H
-console.log('Server listening on http://localhost:' + port);
+}).listen(port,ip);    //#H
+console.log('Server listening on '+ ip+':' + port);
 
 //#A Create an http object, which requires the http module 
 //#B Create a server and define the function which will handle incoming requests
