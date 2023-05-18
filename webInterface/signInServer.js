@@ -24,12 +24,26 @@ http.createServer(function(request,response){    //#B
   for (x in trailers) {
     console.log('\t{' + x + ': \"' + trailers[x] + '\"}');
   }
-  
   logs=require('../logs/SRT_sample_queue.json')
   occupancy=Object.keys(logs).length;
+  queue = [];
   for (student in logs) {
-    queue.push(student);
+    if (!queue.includes(logs[student].name)){
+      queue.push(logs[student].name);
+    }
   }
+  fs.watchFile(require.resolve('../logs/SRT_sample_queue.json'), function () {
+    console.log("New Sign In, reloading...");
+    delete require.cache[require.resolve('../logs/SRT_sample_queue.json')]
+    logs=require('../logs/SRT_sample_queue.json')
+    occupancy=Object.keys(logs).length;
+    queue = [];
+    for (student in logs) {
+      if (!queue.includes(logs[student].name)){
+      queue.push(logs[student].name);
+    }
+  }
+});
 
   response.writeHead(200,    //#C
         {'Content-Type': 'application/json',    //#D
@@ -40,7 +54,7 @@ http.createServer(function(request,response){    //#B
   console.log('Response sent to client\n');
 
 }).listen(port,ip);    //#H
-console.log('Server listening on '+ ip+':' + port);
+console.log('Server listening on '+ ip + ':' + port);
 
 //#A Create an http object, which requires the http module 
 //#B Create a server and define the function which will handle incoming requests
