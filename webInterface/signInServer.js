@@ -4,7 +4,7 @@ var port = 1441;    // can use any port # you prefer (above 1024) - client must 
 var currentSRTs = ["Tori Robinson","Nathan Hurtig"];
 var queue = [];
 var occupancy = 0;
-var ip = '137.112.220.167';
+// var ip = '137.112.220.167';
 var fs = require('fs')
 
 // anonymous function - function which handles requests to server
@@ -14,6 +14,7 @@ http.createServer(function(request,response){    //#B
   var x;
   var headers = request.headers;
   var trailers = request.trailers;
+  var url = request.url;
   console.log('New incoming client request for ' + request.url);
   console.log('Request method: ' + request.method);
   console.log('Headers: ');
@@ -24,23 +25,33 @@ http.createServer(function(request,response){    //#B
   for (x in trailers) {
     console.log('\t{' + x + ': \"' + trailers[x] + '\"}');
   }
-  
-  logs=require('../logs/SRT_sample_queue.json')
-  occupancy=Object.keys(logs).length;
-  for (student in logs) {
-    queue.push(student);
-  }
 
+  console.log('full url: ');
+  console.log(url.toString());
+  queue=require('../logs/SRT_sample_queue.json')
   response.writeHead(200,    //#C
         {'Content-Type': 'application/json',    //#D
          'Access-Control-Allow-Origin': '*'});    //#E
-  response.write('{"currentSRTs" : "' + currentSRTs + '", "occupancy" : "' + occupancy +
-  '", "queue" : "' + queue +'"}');    //#F
+     //#F
+  occupancy=Object.keys(queue).length;
+    if (url === '/currentSRTs'){
+      response.write('{"currentSRTs" : "' + currentSRTs +'"}'); 
+    }
+    else if (url === '/occupancy'){
+      response.write('{""occupancy" : "' + occupancy +'"}'); 
+    }
+    else if (url === '/queue'){
+      response.write(JSON.stringify(queue));  
+    }
+    else{
+      response.write('{"currentSRTs" : "' + currentSRTs +'"}'); 
+    }
+  
   response.end();    //#G
   console.log('Response sent to client\n');
 
-}).listen(port,ip);    //#H
-console.log('Server listening on '+ ip+':' + port);
+}).listen(port);    //#H
+console.log('Server listening on localhost:' + port);
 
 //#A Create an http object, which requires the http module 
 //#B Create a server and define the function which will handle incoming requests

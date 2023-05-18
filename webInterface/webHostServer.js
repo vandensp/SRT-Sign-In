@@ -11,9 +11,18 @@ http.createServer(function(request,response){    //#B
     var headers = request.headers;
     var trailers = request.trailers;
     var url = request.url;
-    var argurl = url.toString().split('?')[1]
-    var params = argurl.split('&');
+    var argurl = ''
+    var params = ''
     var args = {};
+    if (url.includes('?')){
+        argurl = url.toString().split('?')[1]
+        argurl = argurl.substring(argurl.indexOf('&') + 1);
+        if (argurl.includes('&'))
+        params = argurl.split('&');
+        
+    }
+    
+    
     console.log('New incoming client request for ' + request.url);
     console.log('Request method: ' + request.method);
     console.log('Headers: ');
@@ -26,11 +35,10 @@ http.createServer(function(request,response){    //#B
     }
     console.log('full url: ');
     console.log(url.toString());
-    argurl = argurl.substring(argurl.indexOf('&') + 1);
+    
     console.log('arg url: ');
     console.log(argurl);
     console.log('Params: ');
-    // separate out parameters from url
     for (x in params) {
         var y = params[x].split('=');
         if (y[0] === 'path') {
@@ -42,21 +50,52 @@ http.createServer(function(request,response){    //#B
             console.log('\t{' + y[0] + ': \"' + args[y[0]] + '\"}');
         }
     }
-    if (argurl === 'client'){
+    // separate out parameters from url
+    
+    if (url.includes('client')){
+        response.writeHead(200,    //#C
+        {'Content-Type': 'text/html',    //#D
+         'Access-Control-Allow-Origin': '*'});    //#E
         index= fs.readFileSync('signInClient.html')
+        response.write(index)
     }
-    else if (argurl === 'srt'){
+    else if (url.includes('srtClient')){
+        response.writeHead(200,    //#C
+        {'Content-Type': 'text/html',    //#D
+         'Access-Control-Allow-Origin': '*'});    //#E
         index = fs.readFileSync('signInSRT.html')
+        response.write(index)
+    }
+    else if (url.includes('jpg')){
+        var temp = url.replace('%20', ' ')
+        response.writeHead(200,    //#C
+        {'Content-Type': 'image/jpeg',    //#D
+         'Access-Control-Allow-Origin': '*'});    //#E
+        var s = fs.createReadStream('.'+temp);
+        s.on('open', function () {
+            s.pipe(response);
+            });
+    }
+    else if (url.includes('png')){
+        var temp = url.replace('%20', ' ')
+        response.writeHead(200,    //#C
+        {'Content-Type': 'image/png',    //#D
+         'Access-Control-Allow-Origin': '*'});    //#E
+        var s = fs.createReadStream('.'+temp);
+        s.on('open', function () {
+            s.pipe(response);
+            });
     }
     else{
-        index= fs.readFileSync('signInClient.html')
+        response.writeHead(200,    //#C
+        {'Content-Type': 'text/html',    //#D
+         'Access-Control-Allow-Origin': '*'})
+         
     }
-    response.writeHead(200,    //#C
-          {'Content-Type': 'text/html',    //#D
-           'Access-Control-Allow-Origin': '*'});    //#E
+   
     //getSRTs();
    
-    response.end(index);    //#G
+    response.end();    //#G
     console.log('Response sent to client\n');
   
   }).listen(port,'');    //#H

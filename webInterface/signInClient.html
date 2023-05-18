@@ -21,7 +21,7 @@
     <h3 ><br/><p>Upcoming Review Sessions</p></h4>
 	
     <script type="text/javascript">
-    var echoUrl = 'http://137.112.220.167:1441/srtSignIn';
+    var echoUrl = 'http://137.112.220.167:1441/currentSRTs';
     $(document).ready( //#A
       $.ajax({    //#B
         dataType: "json",
@@ -31,9 +31,7 @@
           $('#temp0').append("Connected to " + echoUrl); 
           $('#srt1').html(data.currentSRTs.split(",")[0]); 
           $('#srt2').html(data.currentSRTs.split(",")[1]);   
-          $('#image1').attr('src', data.src);
-          $('#occupancy').html("Occupancy: " + data.occupancy + " / 36" );
-          $('#queue').html("Queue: " + data.queue);      
+          $('#image1').attr('src', data.src);   
         }
       })
     );
