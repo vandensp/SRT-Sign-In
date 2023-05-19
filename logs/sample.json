@@ -1,0 +1,31 @@
+{
+    "id": 80000000,
+    "name": "name",
+    "major": "major",
+    "cur_visit": {
+        "in": "Tue, 16 May 2023 15:10:45",
+        "out": "",
+        "type": "office hours",
+        "SRT": "placeholder 0",
+        "class": "class title",
+        "priority": 0
+    },
+    "visits":{
+        "Thu, 11 May 2023 16:13:38": {
+            "in": "Thu, 11 May 2023 16:13:38",
+            "out": "Thu, 11 May 2023 16:13:56",
+            "type": "office hours",
+            "SRT": "placeholder 0",
+            "class": "class title",
+            "Priority": 0
+        },
+        "Tue, 16 May 2023 14:51:55": {
+            "in": "Tue, 16 May 2023 14:51:55",
+            "out": "Tue, 16 May 2023 14:52:16",
+            "type": "office hours",
+            "SRT": "placeholder 0",
+            "class": "class title",
+            "Priority": 0
+        }
+    }
+}

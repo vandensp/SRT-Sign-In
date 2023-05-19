@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>SRT Sign-in Hub</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap-theme.min.css">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+  </head>
+  <body>
+    <img src="srtlogo.png" height=250 width=600>
+    <form action="javascript:sendData(student.value)">
+      <label for="studentName">ID:</label>
+      <input type="text" id="student" name="student">
+      <input type="submit" name="submit" value="Get Info"/>
+    </form>
+    <h3 id='temp0'></h3>
+    <h3 ><br/><p>Name:</p></h3>
+    <h3 id='name'></h3>
+    <h3 ><br/><p>Data</p></h3>
+    <pre id='data'></pre>
+    
+
+
+	
+    <script type="text/javascript">
+      function sendData(student){
+         var echoUrl = 'http://localhost:1441/student/'+student;
+              $.ajax({    //#B
+                dataType: "json",
+                url: echoUrl,
+                success: function(data) {    //#C
+                  console.log(data);
+                  pretty_data = JSON.stringify(data, null, 4);
+                  console.log(pretty_data);
+                  $('#data').html(pretty_data); 
+                  $('#name').html(data.name);            
+                      }
+                    })
+    }
+    </script>
+  </body>
+</html>
