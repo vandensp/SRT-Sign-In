@@ -66,6 +66,13 @@ http.createServer(function(request,response){    //#B
         index = fs.readFileSync('signInSRT.html')
         response.write(index)
     }
+    else if (url.includes('studentClient')){
+        response.writeHead(200,    //#C
+        {'Content-Type': 'text/html',    //#D
+         'Access-Control-Allow-Origin': '*'});    //#E
+        index = fs.readFileSync('signInStudent.html')
+        response.write(index)
+    }
     else if (url.includes('jpg')){
         var temp = url.replace('%20', ' ')
         response.writeHead(200,    //#C

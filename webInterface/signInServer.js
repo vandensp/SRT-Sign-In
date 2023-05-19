@@ -1,5 +1,6 @@
 // Example of simple server which displays info about incoming requests and sends simple response
 var http = require("http");    //#A
+const path = require('path');
 var port = 1441;    // can use any port # you prefer (above 1024) - client must use same port #
 var currentSRTs = ["Tori Robinson","Nathan Hurtig"];
 var queue = [];
@@ -42,6 +43,12 @@ http.createServer(function(request,response){    //#B
     }
     else if (url === '/queue'){
       response.write(JSON.stringify(queue));  
+    }
+    else if (url.includes( '/student')){
+      student = url.substring(1).split('/')[1]
+
+      data =require('../logs/'+student+'.json')
+      response.write(JSON.stringify(data))
     }
     else{
       response.write('{"currentSRTs" : "' + currentSRTs +'"}'); 
