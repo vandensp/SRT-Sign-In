@@ -1,49 +1,54 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>SRT Sign-in Hub</title>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap-theme.min.css">
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
-  </head>
-  <body>
-    <img src="srtlogo.png" height=250 width=600>
-    <h3 id='temp0'></h3>
-    <h3 ><br/><p>Occupancy</p></h3>
-    <h3 id='occupancy'></h3>
-    <h3 ><br/><p>Queue</p></h3>
-    <h3 id='queue'></h3>
-    
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SRT Sign-in Hub</title>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap-theme.min.css">
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+</head>
+
+<body>
+  <img src="srtlogo.png" height=250 width=600>
+  <h3 id='temp0'></h3>
+  <h3><br />
+    <p>Occupancy</p>
+  </h3>
+  <h3 id='occupancy'></h3>
+  <h3><br />
+    <p>Queue</p>
+  </h3>
+  <pre id='queue'></pre>
 
 
-	
-    <script type="text/javascript">
-         var echoUrl = 'http://localhost:1441/occupancy';
-            $(document).ready( //#A
-              $.ajax({    //#B
-                dataType: "json",
-                url: echoUrl,
-                success: function(data) {    //#C
-                  console.log(data);
-                  $('#occupancy').html("Occupancy: " + data.occupancy + " / 36" );
-                  var echoUrl = 'http://localhost:1441/queue';
-                  $(document).ready( //#A
-                    $.ajax({    //#B
-                      dataType: "json",
-                      url: echoUrl,
-                      success: function(data) {    //#C
-                        console.log(data);
-                        $('#queue').html("Queue: " + JSON.stringify(data.queue));      
-                      }
-                    })
-    );     
-                }
-              })
+
+
+  <script type="text/javascript">
+    var echoUrl = 'http://localhost:1441/occupancy';
+    $(document).ready( //#A
+      $.ajax({    //#B
+        dataType: "json",
+        url: echoUrl,
+        success: function (data) {    //#C
+          console.log(data);
+          $('#occupancy').html("Occupancy: " + data.occupancy + " / 36");
+          echoUrl = 'http://localhost:1441/queue';
+          $.ajax({    //#B
+            dataType: "json",
+            url: echoUrl,
+            success: function (data) {    //#C
+              console.log(data);
+              $('#queue').html("Queue: " + JSON.stringify(data, null, 4));
+            }
+          })
+        }
+      })
     );
-    </script>
-  </body>
+  </script>
+</body>
+
 </html>

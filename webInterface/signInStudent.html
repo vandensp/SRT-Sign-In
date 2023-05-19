@@ -21,7 +21,7 @@
     <h3 ><br/><p>Name:</p></h3>
     <h3 id='name'></h3>
     <h3 ><br/><p>Data</p></h3>
-    <h3 id='data'></h3>
+    <pre id='data'></pre>
     
 
 
@@ -34,7 +34,9 @@
                 url: echoUrl,
                 success: function(data) {    //#C
                   console.log(data);
-                  $('#data').html(JSON.stringify(data)); 
+                  pretty_data = JSON.stringify(data, null, 4);
+                  console.log(pretty_data);
+                  $('#data').html(pretty_data); 
                   $('#name').html(data.name);            
                       }
                     })

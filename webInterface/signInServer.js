@@ -39,7 +39,7 @@ http.createServer(function(request,response){    //#B
       response.write('{"currentSRTs" : "' + currentSRTs +'"}'); 
     }
     else if (url === '/occupancy'){
-      response.write('{""occupancy" : "' + occupancy +'"}'); 
+      response.write('{"occupancy" : "' + occupancy +'"}'); 
     }
     else if (url === '/queue'){
       response.write(JSON.stringify(queue));  
